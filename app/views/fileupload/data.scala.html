@@ -1,0 +1,1862 @@
+
+@(projectName: Seq[String], proname: String)(implicit session: Session)
+@fileupload.main(proname, projectName, proname) {
+
+    <style>
+            .update {
+                border-radius: 15px 15px 15px 15px;
+                background-color: transparent;
+                color: gray;
+                border: 0px;
+            }
+
+            .update:hover {
+                color: gray;
+                background-color: lightgray;
+            }
+
+            .fastq {
+                background-color: transparent;
+                color: gray;
+                border: 0px;
+            }
+
+            .fastq:hover {
+                color: black;
+                text-decoration: underline;
+            }
+
+            .delete {
+                border-radius: 15px 15px 15px 15px;
+                background-color: transparent;
+                color: gray;
+                border: 0px;
+            }
+
+            .delete:hover {
+                color: white;
+                background-color: red;
+            }
+
+            .state {
+                display: none;
+            }
+        .layui-layer-title{
+            background-color: #428BCA;
+            height: 55px;
+        }
+    </style>
+
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="portlet blue-madison box">
+
+                <div class="portlet-title">
+                    <div class="caption">
+                        样品管理
+                    </div>
+                </div>
+
+
+                <div class="portlet-body" id="t">
+
+                    <div class="table-responsive" >
+
+                        <table class="display table table-bordered table-hover table-striped" id="table" data-pagination="true" data-search="true"
+                        data-search-align="left" data-page-list="[10, 25, 50, 100]" data-multiple-search="true">
+
+                            <thead>
+                                <tr>
+                                    <th data-field="sample" data-sortable="true" id="sample">样品名</th>
+                                    <th data-field="input_type" data-sortable="true" id="input_type">数据类型</th>
+                                    <th data-field="createdate" data-sortable="true" id="createdata">创建时间</th>
+                                    <th data-field="state" data-sortable="true" id="state">运行状态</th>
+                                    <th data-field="results" data-sortable="false" id="results">文件一览</th>
+                                    <th data-field="operation" data-sortable="false" id="operation">操作</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="update" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">修改样品名：</span>
+                    </h4>
+                </div>
+                <form id="updateForm" data-toggle="validator">
+                    <div class="modal-body">
+                        <div class="row-fluid">
+
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            样品名：
+                                        </label>
+                                        <input class="form-control indent" id="samplename" name="samplename" readonly="readonly" >
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-8" style="display: none;" >
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            ID：
+                                        </label>
+                                        <input class="form-control indent" id="sampleId" name="sampleId" readonly="readonly" >
+                                    </div>
+                                </div>
+
+
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            新的样品名: </label>
+                                        <input class="form-control indent" name="newsample" id="newsample" >
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-info">
+                        <button type="submit" class="btn blue" onclick="sureUpdate()">运行</button>
+                        <button type="button" class="btn green" data-dismiss="modal">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="restPE" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">设置参数：</span>
+                    </h4>
+                </div>
+                <form id="resetPEForm" data-toggle="validator" class="registration-form form-horizontal">
+                    <div class="modal-body">
+                        <div class="row-fluid">
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="proname" id="proname_pe" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="peId" id="peId" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">样品信息:</label>
+                                <div class="col-sm-6 indent">
+                                    <input name="sample" id="sample_pe" class="form-control"   readonly="readonly"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">
+                                    Input FASTQ quality file scores encoding type:</label>
+                                <div class="col-sm-6 indent">
+                                    <select class="form-control" name="encondingType" id="encondingType_pe">
+                                        <option value="-phred64">Illumina 1.3-1.7 Phred+64</option>
+                                        <option value="-phred33" selected>Illumina 1.8+ Phred+33</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-6">Trimmomatic PE(paired-end)(质控参数设置)</label>
+                                    <label class="col-sm-1">
+
+                                    <a id="down-1" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-1" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+
+                                </label>
+                            </div>
+
+                            <div id="set-1" style="display: none" class="indent">
+
+                                <div class="form-group">
+                                    <p class="col-sm-7">Perform initial ILLUMINACLIP step?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="stepMethod" id="stepMethod_pe" onchange="stepChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="stepValue" style="display: none;">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">Adapter sequences to use:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="adapter" id="adapter_pe">
+                                                <option value="TruSeq2-PE.fa">
+                                                    TruSeq2 (paired-ended, for Illumina GAII)</option>
+                                                <option value="TruSeq3-PE.fa">
+                                                    TruSeq3 (paired-ended, for MiSeq and HiSeq)</option>
+                                                <option value="TruSeq3-PE-2.fa">
+                                                    TruSeq3 (additional seqs) (paired-ended, for MiSeq and HiSeq)</option>
+                                                <option value="NexteraPE-PE.fa">Nextera (paired-ended)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum mismatch count which will still allow a full match to be performed:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="seed_mismatches" id="seed_mismatches_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            How accurate the match between the two 'adapter ligated' reads must be for PE palin
+                                            drome read alignment:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="palindrome_clip_threshold" id="palindrome_clip_threshold_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            How accurate the match between any adapter etc. sequence must be against a read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="simple_clip_threshold" id="simple_clip_threshold_pe" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Perform Sliding window trimming (SLIDINGWINDOW)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="trimMethod" id="trimMethod_pe" onchange="trimChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="trimValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to average across:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="window_size" id="window_size_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Average quality required:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="required_quality" id="required_quality_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Drop reads below a specified length (MINLEN)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="minlenMethod" onchange="minlenChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="minlenValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum length of reads to be kept:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="minlen" id="minlen_pe" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut bases off the start of a read, if below a threshold quality (LEADING)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="leadingMethod" id="leadingMethod_pe" onchange="leadingChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="leadingValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum quality required to keep a base:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="leading" id="leading_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut bases off the end of a read, if below a threshold quality (TRAILING)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="trailingMethod" id="trailingMethod_id" onchange="trailingChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="trailingValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum quality required to keep a base:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trailing" id="trailing_pe" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Cut the read to a specified length (CROP):</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="cropMethod" id="cropMethod_pe" onchange="cropChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="cropValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to keep from the start of the read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="crop" id="crop_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut the specified number of bases from the start of the read (HEADCROP)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="headcropMethod" id="headcropMethod_pe" onchange="headcropChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="headcropValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to remove from the start of the read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="headcrop" id="headcrop_pe" class="form-control" value="0" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-6">HISTA2 A fast and sensitive alignment program</label>
+                                <label class="col-sm-1">
+                                    <a id="down-2" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-2" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </label>
+                            </div>
+
+                            <div id="set-2" style="display: none" class="indent">
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Specify strand-specific information:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="rna_strandness" id="rna_strandness_pe">
+                                            <option value="None">Unstranded</option>
+                                            <option value="FR">FR</option>
+                                            <option value="RF">RF</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Paired-end options:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="paired_end_options_selector" id="paired_end_options_selector_pe" onchange="pairedChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify paired-end parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="pairedValue" style="display: none;">
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum fragment length:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="minins" id="minins_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum fragment length:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="maxins" id="maxins_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable alignments of individual mates? i.e. Suppress unpaired alignments for paired reads?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_mixed" id="no_mixed_pe">
+                                                <option value="--no-mixed">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable discordant alignments? i.e. Suppress discordant alignments for paired reads?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_discordant" id="no_discordant_pe">
+                                                <option value="--no-discordant">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Use GTF file with known splice sites?</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="gtf" id="gtf_pe">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Reporting</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="report_type" id="report_type_pe" onchange="reportChange(this)">
+                                            <option value="defaults">look for multiple alignments, report best, with MAPQ</option>
+                                            <option value="advanced">report up to K alns per read; MAPQ not meaningful</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="reportValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            K Primary alignments number for each read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_primary" id="max_primary_pe" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Alignment options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="alignment_options_selector" id="alignment_options_selector_pe" onchange="alignChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify alignment parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="alignValue" style="display: none;">
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Function type</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="function_type" id="function_type_pe">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="constant_term" id="constant_term_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="coefficient" id="coefficient_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Ignore quality values? i.e. Treat all quality values as 30 on Phred scale?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="ignore_quals" id="ignore_quals_pe">
+                                                <option value="--ignore-quals">Yes</option>
+                                                <option value="" >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Skip forward strand of reference? i.e. Do not align forward (original) version of read?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="skip_forward" id="skip_forward_pe">
+                                                <option value="--nofw">Yes</option>
+                                                <option value=" ">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Skip reverse strand of reference? i.e. Do not align reverse-complement version of read?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="skip_reverse" id="skip_reverse_pe">
+                                                <option value="--norc">Yes</option>
+                                                <option value=" ">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Input options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="input_options_selector" id="input_options_selector_pe"  onchange="inputChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify alignment parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="inputValue" style="display: none;">
+
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Skip the first N reads or pairs in the input:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="skip" id="skip_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Stop after aligning N reads:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="stop_after" id="stop_after_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Trim 5:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trim_five" id="trim_five_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Trim 3:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trim_three" id="trim_three_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Scoring options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="scoring_options_selector" id="scoring_options_selector_pe" onchange="scoreChange(this)">
+                                            <option value="defaults" >Use default values</option>
+                                            <option value="advanced">Specify scoring parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="scoreValue" style="display: none;">
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Function type</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="score_function_type" id="score_function_type_pe">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="score_constant_term" id="score_constant_term_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="score_coefficient" id="score_coefficient_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Set match bonus:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="match_bonus" id="match_bonus_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum mismatch penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_mismatch" id="max_mismatch_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum mismatch penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="min_mismatch" id="min_mismatch_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Ambiguous read penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ambiguous_penalty" id="ambiguous_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum soft-clipping penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="soft_clip_penalty_max" id="soft_clip_penalty_max_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum soft-clipping penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="soft_clip_penalty_min" id="soft_clip_penalty_min_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Read gap open penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="read_open_penalty" id="read_open_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Read gap extend penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="read_extend_penalty" id="read_extend_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Reference gap open penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ref_open_penalty" id="ref_open_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Reference gap extend penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ref_extend_penalty" id="ref_extend_penalty_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Spliced alignment parameters</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="spliced_options_selector"  id="spliced_options_selector_pe" onchange="splicedChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify scoring parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="splicedValue" style="display: none;">
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for a canonical splice sites(e.g. GT/AG)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="canonical_penalty" id="canonical_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for a non-canonical splice sites(e.g. non-GT/AG)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="noncanonical_penalty" id="noncanonical_penalty_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for long introns with canonical splice sites</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="spliced_function_type">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="spliced_constant_term" id="spliced_constant_term_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="spliced_coefficient" id="spliced_coefficient_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for long introns with noncanonical splice sites</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="nc_function_type" id="nc_function_type_pe">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="nc_constant_term" id="nc_constant_term_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="nc_coefficient" id="nc_coefficient_pe" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum intron length</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="min_intron" id="min_intron_pe" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum intron length</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_intron" id="max_intron_pe" class="form-control"/>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable spliced alignment</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_spliced_alignment" id="no_spliced_alignment_pe">
+                                                <option value="--no-spliced-alignment">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Transcriptome assembly reporting</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="tma" id="tma_pe">
+                                                <option value=" ">Use default reporting.</option>
+                                                <option value="--dta-cufflinks">Report alignments tailored specifically for Cufflinks.</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-info">
+                        <button type="button" class="btn blue" onclick="RunningPE()">运行</button>
+                        <button type="button" class="btn green" data-dismiss="modal">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="restSE" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">设置参数：</span>
+                    </h4>
+                </div>
+                <form id="resetSEForm" data-toggle="validator" class="registration-form form-horizontal">
+                    <div class="modal-body">
+                        <div class="row-fluid">
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="proname" id="proname_se" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="seId" id="seId" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">样品信息:</label>
+                                <div class="col-sm-6 indent">
+                                    <input name="sample" id="sample_se" class="form-control"   readonly="readonly"/>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="col-sm-12">
+                                    Input FASTQ quality file scores encoding type:</label>
+                                <div class="col-sm-6 indent">
+                                    <select class="form-control" name="encondingType"  id="encondingType_se">
+                                        <option value="-phred64">Illumina 1.3-1.7 Phred+64</option>
+                                        <option value="-phred33">Illumina 1.8+ Phred+33</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-6">Trimmomatic SE(single)(质控参数设置)</label>
+                                <div class="col-sm-1">
+                                    <a id="down-3" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-3" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div id="set-3" style="display: none" class="indent">
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Perform initial ILLUMINACLIP step?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="stepMethod" id="stepMethod_se" onchange="stepChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="stepValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">Adapter sequences to use:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="adapter" id="adapter_se">
+                                                <option value="TruSeq2-SE.fa">TruSeq2 (single-ended, for Illumina GAII)</option>
+                                                <option value="TruSeq3-SE.fa">TruSeq3 (single-ended, for MiSeq and HiSeq)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum mismatch count which will still allow a full match to be performed:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="seed_mismatches" id="seed_mismatches_se" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            How accurate the match between the two 'adapter ligated' reads must be for PE palin
+                                            drome read alignment:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="palindrome_clip_threshold" id="palindrome_clip_threshold_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            How accurate the match between any adapter etc. sequence must be against a read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="simple_clip_threshold" id="simple_clip_threshold_se" class="form-control"  />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Perform Sliding window trimming (SLIDINGWINDOW)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="trimMethod" id="trimMethod_se" onchange="trimChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="trimValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to average across:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="window_size" id="window_size_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Average quality required:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="required_quality" id="required_quality_se" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Drop reads below a specified length (MINLEN)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="minlenMethod" id="minlenMethod_se" onchange="minlenChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="minlenValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum length of reads to be kept:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="minlen" id="minlen_se" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut bases off the start of a read, if below a threshold quality (LEADING)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="leadingMethod" id="leadingMethod_se" onchange="leadingChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="leadingValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum quality required to keep a base:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="leading" id="leading_se" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut bases off the end of a read, if below a threshold quality (TRAILING)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="trailingMethod" id="trailingMethod_se" onchange="trailingChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="trailingValue">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum quality required to keep a base:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trailing" id="trailing_se" class="form-control"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">Cut the read to a specified length (CROP):</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="cropMethod" id="cropMethod_se" onchange="cropChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="cropValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to keep from the start of the read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="crop" id="crop_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Cut the specified number of bases from the start of the read (HEADCROP)?:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="headcropMethod" id="headcropMethod_se" onchange="headcropChange(this)">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="headcropValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Number of bases to remove from the start of the read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="headcrop" id="headcrop_se" class="form-control"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-6">HISTA2 A fast and sensitive alignment program</label>
+                                <div class="col-sm-1">
+                                    <a id="down-4" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-4" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div id="set-4" style="display: none" class="indent">
+
+                                <div class="form-group" style="display: none;">
+                                    <p class="col-sm-12">
+                                        Specify strand-specific information:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="rna_strandness" id="rna_strandness_se">
+                                            <option value="None">Unstranded</option>
+                                            <option value="FR">FR</option>
+                                            <option value="RF">RF</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" style="display: none;">
+                                    <p class="col-sm-12">Paired-end options:</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="paired_end_options_selector" id="paired_end_options_selector_se" onchange="pairedChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify paired-end parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="pairedValue" style="display: none;">
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum fragment length:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="minins" id="minins_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum fragment length:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="maxins" id="maxins_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable alignments of individual mates? i.e. Suppress unpaired alignments for paired reads?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_mixed" id="no_mixed_se">
+                                                <option value="--no-mixed">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable discordant alignments? i.e. Suppress discordant alignments for paired reads?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_discordant" id="no_discordant_se">
+                                                <option value="--no-discordant">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Use GTF file with known splice sites?</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="gtf" id="gtf_se">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Reporting</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="report_type" id="report_type_se" onchange="reportChange(this)">
+                                            <option value="defaults">look for multiple alignments, report best, with MAPQ</option>
+                                            <option value="advanced">report up to K alns per read; MAPQ not meaningful</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="reportValue" style="display: none">
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            K Primary alignments number for each read:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_primary" id="max_primary_se" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Alignment options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="alignment_options_selector" id="alignment_options_selector_se" onchange="alignChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify alignment parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="alignValue" style="display: none;">
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Function type</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="function_type" id="function_type_se">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="constant_term" id="constant_term_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="coefficient" id="coefficient_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Ignore quality values? i.e. Treat all quality values as 30 on Phred scale?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="ignore_quals" id="ignore_quals_se">
+                                                <option value="--ignore-quals">Yes</option>
+                                                <option value="" >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Skip forward strand of reference? i.e. Do not align forward (original) version of read?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="skip_forward" id="skip_forward_se">
+                                                <option value="--nofw">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Skip reverse strand of reference? i.e. Do not align reverse-complement version of read?</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="skip_reverse" id="skip_reverse_se">
+                                                <option value="--norc">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Input options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="input_options_selector" id="input_options_selector_se" onchange="inputChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify alignment parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="inputValue" style="display: none;">
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Skip the first N reads or pairs in the input:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="skip" id="skip_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Stop after aligning N reads:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="stop_after" id="stop_after_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Trim 5:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trim_five" id="trim_five_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Trim 3:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="trim_three" id="trim_three_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+
+
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Scoring options</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="scoring_options_selector" id="scoring_options_selector_se" onchange="scoreChange(this)">
+                                            <option value="defaults" >Use default values</option>
+                                            <option value="advanced">Specify scoring parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="scoreValue" style="display: none;">
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Function type</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="score_function_type" id="score_function_type_se">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="score_constant_term" id="score_constant_term_se" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z):</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="score_coefficient" id="score_coefficient_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Set match bonus:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="match_bonus" id="match_bonus_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum mismatch penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_mismatch" id="max_mismatch_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum mismatch penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="min_mismatch" id="min_mismatch_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Ambiguous read penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ambiguous_penalty" id="ambiguous_penalty_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum soft-clipping penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="soft_clip_penalty_max" id="soft_clip_penalty_max_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum soft-clipping penalty, lower qual = lower penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="soft_clip_penalty_min" id="soft_clip_penalty_min_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Read gap open penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="read_open_penalty" id="read_open_penalty_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Read gap extend penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="read_extend_penalty" id="read_extend_penalty_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Reference gap open penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ref_open_penalty" id="ref_open_penalty_se" class="form-control"  />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Reference gap extend penalty:</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="ref_extend_penalty" id="ref_extend_penalty_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Spliced alignment parameters</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="spliced_options_selector" id="spliced_options_selector_se" onchange="splicedChange(this)">
+                                            <option value="defaults">Use default values</option>
+                                            <option value="advanced">Specify scoring parameters</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="splicedValue" style="display: none;">
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for a canonical splice sites(e.g. GT/AG)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="canonical_penalty" id="canonical_penalty_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for a non-canonical splice sites(e.g. non-GT/AG)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="noncanonical_penalty" id="noncanonical_penalty_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for long introns with canonical splice sites</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="spliced_function_type" id="spliced_function_type_se">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="spliced_constant_term" id="spliced_constant_term_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="spliced_coefficient" id="spliced_coefficient_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Penalty for long introns with noncanonical splice sites</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="nc_function_type" id="nc_function_type_se">
+                                                <option value="C">Constant</option>
+                                                <option value="L">Linear [f(x) = y + z * x]</option>
+                                                <option value="S">Square root [f(x) = y + z * x^2]</option>
+                                                <option value="G">Natural logarithm [f(x) = y + z * log(x)]</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Constant term (y)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="nc_constant_term" id="nc_constant_term_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Coefficient (z)</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="nc_coefficient" id="nc_coefficient_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Minimum intron length</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="min_intron" id="min_intron_se" class="form-control"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" >
+                                        <p class="col-sm-12 indent-2">
+                                            Maximum intron length</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <input name="max_intron" id="max_intron_se" class="form-control" />
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Disable spliced alignment</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="no_spliced_alignment" id="no_spliced_alignment_se">
+                                                <option value="--no-spliced-alignment">Yes</option>
+                                                <option value=" " >No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p class="col-sm-12 indent-2">
+                                            Transcriptome assembly reporting</p>
+                                        <div class="col-sm-6 indent-1">
+                                            <select class="form-control" name="tma" id="tma_se">
+                                                <option value=" ">Use default reporting.</option>
+                                                <option value="--dta-cufflinks" >Report alignments tailored specifically for Cufflinks.</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-info">
+                        <button type="button" class="btn blue" onclick="RunningSE()">运行</button>
+                        <button type="button" class="btn green" data-dismiss="modal">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="logShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">日志信息：</span>
+                        <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                    </h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row-fluid" id="logInfo">
+
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-top: 200px;">
+        <div class="modal-dialog" style="width: 400px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h4 class="modal-title" align="center" id="title1">
+                        <span id="deleteTitle" style="font-weight: bold">请确认是否删除样品"
+                        <b id="dsample">
+
+                        </b>"?
+                        </span>
+                    </h4>
+                    <h4 class="modal-title" align="center" id="title2" style="display: none">
+                        <span id="deleteTitle" style="font-weight: bold">删除中...</span>
+                    </h4>
+                    <h4 class="modal-title" align="center" id="title3" style="display: none">
+                        <span id="deleteTitle" style="font-weight: bold">删除成功</span>
+                    </h4>
+                </div>
+                <div class="row-fluid" align="center" >
+                    <div id="warn1">
+                        <img src="/assets/images/warning.png">
+                    </div>
+                    <div id="warn2" style="display: none;">
+                        <img src="/assets/images/timg2.gif" style="height: 109px;">
+                    </div>
+                    <div id="warn3" style="display: none;">
+                        <img src="/assets/images/success.png">
+                    </div>
+                </div>
+                <div class="modal-footer bg-info">
+                    <div align="center">
+                        <button type="button" class="btn red" onclick="deleteSample(this)" style="width: 100px;" id="btn1">确定</button>
+                        <button type="button" class="btn green" data-dismiss="modal" style="width: 100px;" id="btn2">取消</button>
+                        <button type="button" class="btn green" onclick="updateDelete()" style="width: 100px;display: none;" id="btn3">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="@routes.Assets.at("javascripts/reset.js")" type="text/javascript"></script>
+    <script>
+            $(function () {
+                formValidation();
+                tableInformation();
+
+                $('#updateForm').formValidation({
+                    framework: 'bootstrap',
+                    icon: {
+                        valid: 'glyphicon glyphicon-ok',
+                        invalid: 'glyphicon glyphicon-remove',
+                        validating: 'glyphicon glyphicon-refresh'
+                    },
+                    fields: {
+                        newsample: {
+                            validators: {
+                                notEmpty: {
+                                    message: '不能为空!'
+                                },
+                                different: {
+                                    field: 'samplename',
+                                    message: '不能与原样品名相同'
+                                },
+                                regexp: {
+                                    regexp: '^[A-Za-z0-9"_"]{1,12}$',
+                                    message: '12个以内字符，可使用字母、数字、下划线！'
+                                },
+                                stringLength: {
+                                    message: '样品名长度最大为20！',
+                                    max: function (value, validator, $field) {
+                                        return 20 - (value.match(/\r/g) || []).length;
+                                    }
+                                },
+                                remote: {
+                                    type: 'POST',
+                                    url: '@routes.SampleController.checkNewsample(proname)',
+                                    message: '样品名重复，请重新输入'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                window.setInterval(function () {
+                    $(".state").each(function (n, value) {
+                        var st = value.value;
+                        if (st == 0) {
+                            updateTable();
+                        }
+                    })
+                }, 3000);
+            });
+
+
+
+            function updateSample(obj) {
+                var name = obj.value;
+                var id = obj.id;
+                $("#samplename").empty();
+                $("#samplename").val(name);
+                $("#sampleId").val(id);
+                $("#update").modal("show")
+            }
+
+            function sureUpdate() {
+                var form = $("#updateForm")
+                var fv = form.data("formValidation")
+                fv.validate()
+                if (fv.isValid()) {
+                    var index = layer.load(1, {
+                        shade: [0.1, '#fff']
+                    });
+                    $.ajax({
+                        url: "@routes.SampleController.updateSample()",
+                        type: "put",
+                        dataType: "json",
+                        data: $("#updateForm").serialize(),
+                        success: function (data) {
+                            if (data.valid == "true") {
+                                layer.close(index);
+                                $("#update").modal("hide")
+                                cpm("table","修改成功");
+                            }
+                        }
+                    })
+                }
+            }
+
+
+            function openDelete(obj) {
+                var i = obj.id;
+                var name = obj.value;
+                $("#dsample").empty();
+                $("#dsample").append(name);
+                $("#btn1").val(i);
+                deleteBefore();
+                $("#deleteShow").modal("show");
+
+            }
+
+            function deleteSample(obj) {
+                var id = obj.value;
+                deleting();
+                $.ajax({
+                    url: "/project/deleteSample?id=" + id,
+                    type: "delete",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.valid == "true") {
+                            deleteAfter();
+                        }
+                    }
+                });
+            }
+
+            function updateDelete() {
+                $("#deleteShow").modal("hide");
+                updateTable();
+            }
+
+            function openLog(obj) {
+                $("#logInfo").empty();
+                var id = obj.value;
+                $.ajax({
+                    url: "/project/openLogFile?id=" + id,
+                    type: "get",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#logInfo").append(data.log);
+                        $("#logShow").modal("show")
+                    }
+                })
+            }
+
+            function tableInformation() {
+                $.ajax({
+                    url: "@routes.SampleController.getAllSample(proname)",
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+                        $('#table').bootstrapTable({data: data});
+                    }
+                })
+            }
+
+            function updateTable() {
+                $.ajax({
+                    url: "@routes.SampleController.getAllSample(proname)",
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#table").bootstrapTable('load', data);
+                    }
+                });
+            }
+
+    </script>
+
+
+}

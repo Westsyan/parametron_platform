@@ -1,0 +1,269 @@
+@(projectName: Seq[String], proname: String)(implicit session: Session)
+@fileupload.main("RNA定量分析", projectName, proname) {
+
+    <style>
+            label {
+                text-indent: 2em;
+            }
+
+    </style>
+
+    <div class="row-fluid">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="portlet blue-soft box">
+
+                    <div class="portlet-title">
+                        <div class="caption">
+                            RNA定量分析
+                        </div>
+                    </div>
+
+                    <div class="portlet-body">
+
+                        <form class="registration-form form-horizontal" id="UpdateForm"
+                        accept-charset="UTF-8">
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="proname" id="proname" class="form-control" value="@proname" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">任务名:</label>
+                                <div class="col-sm-4 indent">
+                                    <input name="taskname" id="taskname" class="form-control" />
+                                    <small style="color: red;
+                                        display: none;" id="remote" class="help-block" data-fv-validator="callback" data-fv-for="sample[]" data-fv-result="INVALID">
+                                        任务名重复！</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">请选择样品:</label>
+                                <div class="col-sm-4 indent">
+                                    <select name="sample[]" id="sample" class="checkbox form-control" multiple></select>
+                                </div>
+                                <div class="col-sm-2" style="margin-top: 5px;">
+                                    <input type="checkbox" id="checkbox" style="float: left">选择所有样品
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-4">Cuffquant Precompute gene expression levels(原始数据质量值体系)</label>
+                                <div class="col-sm-1">
+                                    <a id="down-1" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-1" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div id="set-1" style="display: none" class="indent">
+
+                                <div class="form-group">
+                                    <p class="col-sm-5" style="text-indent: 1em;">
+                                        Library prep used for input reads, strand-specific or not:</p>
+                                    <div class="col-sm-12 indent-3">
+                                        <div class="col-sm-4">
+                                            <select class="form-control" name="library_type">
+                                                <option value="ff-firststrand">ff-firststrand</option>
+                                                <option value="ff-secondstrand">ff-secondstrand</option>
+                                                <option value="ff-unstranded">ff-unstranded</option>
+                                                <option value="fr-firststrand">fr-firststrand</option>
+                                                <option value="fr-secondstrand">fr-secondstrand</option>
+                                                <option value="fr-unstranded" selected>fr-unstranded</option>
+                                                <option value="transfrags">transfrags</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-5" style="text-indent: 1em;">
+                                        Library normalization method:</p>
+                                    <div class="col-sm-12 indent-3">
+                                        <div class="col-sm-4">
+                                            <select class="form-control" name="library_norm_method">
+                                                <option value="geometric" selected>geometric</option>
+                                                <option value="classic-fpkm">classic-fpkm</option>
+                                                <option value="quartile">quartile</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-5" style="text-indent: 1em;">
+                                        Hits included in normalization:</p>
+                                    <div class="col-sm-12 indent-3">
+                                        <div class="col-sm-4">
+                                            <select class="form-control" name="hits_norm">
+                                                <option value="--compatible-hits-norm" selected>Compatible Hits</option>
+                                                <option value="--total-hits-norm">All Hits</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class = "actions indent col-sm-4">
+                                    <button type="button" class="btn btn-primary" style="width: 100%;" id="search" onclick="Running()">
+                                        应用</button>
+                                </div>
+                            </div>
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+
+            $("#sample").select2();
+
+            $("#checkbox").click(function () {
+                if ($("#checkbox").is(':checked')) {
+                    $("#sample > option").prop("selected", "selected");// Select All Options
+                    $("#sample").trigger("change");// Trigger change to select 2
+                } else {
+                    $("#sample > option").removeAttr("selected");
+                    $("#sample").trigger("change");// Trigger change to select 2
+                }
+            });
+
+
+            $(function () {
+
+                $.ajax({
+                    url: "/project/getAllSampleName?proname=@proname",
+                    type: "post",
+                    success: function (data) {
+                        $("#sample").select2(
+                                {
+                                    data: data,
+                                    closeOnSelect: false,
+                                }
+                        );
+                    }
+                });
+
+
+                $.ajax({
+                    url: "/parametron/task/getTime",
+                    type: "GET",
+                    success: function (data) {
+                        $("#taskname").val(data.date + "_Task");
+                    }
+                });
+
+                formValidation();
+            });
+
+
+            function formValidation() {
+                $('#UpdateForm').formValidation({
+                    framework: 'bootstrap',
+                    icon: {
+                        valid: 'glyphicon glyphicon-ok',
+                        invalid: 'glyphicon glyphicon-remove',
+                        validating: 'glyphicon glyphicon-refresh'
+                    },
+                    fields: {
+                        taskname: {
+                            validators: {
+                                notEmpty: {
+                                    message: '不能为空!'
+                                },
+                                regexp: {
+                                    regexp: '^[A-Za-z0-9"_"]{1,20}$',
+                                    message: '20个以内字符，可使用字母、数字、下划线！'
+                                },
+                                stringLength: {
+                                    message: '任务名长度最大为20！',
+                                    max: function (value, validator, $field) {
+                                        return 20 - (value.match(/\r/g) || []).length;
+                                    }
+                                }
+                            }
+                        },
+                        'sample[]': {
+                            validators: {
+                                callback: {
+                                    message: '请至少选择俩个样品表型！',
+                                    callback: function (value, validator, $field) {
+                                        // Get the selected options
+                                        var options = validator.getFieldElements('sample[]').val();
+                                        return (options != null
+                                                && options.length >= 2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+
+
+            $("#down-1").click(function () {
+                $("#set-1").show();
+                $("#down-1").hide();
+                $("#up-1").show()
+            });
+
+            $("#up-1").click(function () {
+                $("#set-1").hide();
+                $("#down-1").show();
+                $("#up-1").hide()
+            });
+
+
+            function Running() {
+                var form = $("#UpdateForm");
+                var fv = form.data("formValidation");
+                fv.validate();
+                var x = $("#otuname").value;
+                console.log(x);
+                if (fv.isValid()) {
+                    var index = layer.load(1, {
+                        shade: [0.1, '#fff']
+                    });
+                    $.ajax({
+                        url: "@routes.TaskController.checkName(proname)",
+                        type: "get",
+                        dataType: "json",
+                        data: $("#UpdateForm").serialize(),
+                        success: function (data) {
+                            if (data.valid == "false") {
+                                $("#remote").show();
+                                layer.close(index);
+                            } else {
+                                $.ajax({
+                                    url: "@routes.TaskController.saveDeploy()",
+                                    type: "post",
+                                    dataType: "json",
+                                    data: $("#UpdateForm").serialize(),
+                                    success: function () {
+                                        window.location.replace("/parametron/task/taskPage?proname=@proname")
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+
+    </script>
+}

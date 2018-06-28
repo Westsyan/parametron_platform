@@ -1,0 +1,106 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET           /                                            controllers.LoginController.admin
+
+GET           /home/admin                                  controllers.LoginController.login
+
+GET           /home/sign                                   controllers.LoginController.sign
+
+GET           /home/signSuccess                            controllers.LoginController.signsuccess(account:String,password:String)
+
+GET           /home/toSuccess                              controllers.LoginController.toSuccess
+
+GET           /back/logout                                 controllers.LoginController.logout
+
+GET           /back/toIndex                                controllers.LoginController.toIndex(account:String)
+
+
+
+GET           /project/home                                controllers.SampleController.home
+
+GET           /project/uploadFile                          controllers.SampleController.enterHome(projectname:String)
+GET           /project/deployGet                           controllers.SampleController.deployGet(id:Int)
+GET           /project/loadData                            controllers.SampleController.loadData(proname:String)
+
+POST          /projects/checkRef                           controllers.SampleController.checkRef(proname:String)
+
+
+POST          /project/reset                               controllers.SampleController.resetPE
+
+PUT           /project/updateSample                        controllers.SampleController.updateSample
+
+DELETE        /project/deleteSample                        controllers.SampleController.deleteSample(id:Int)
+
+POST          /project/getAllSmaple                        controllers.SampleController.getAllSample(proname:String)
+
+POST          /home/checkAccount                           controllers.LoginController.checkAccount
+
+GET           /project/addProject                          controllers.ProjectController.addProject
+POST          /project/checkProjectname                    controllers.ProjectController.checkProjectname
+POST          /project/checkNewproname                     controllers.ProjectController.checkNewproname
+DELETE        /project/deleteProject                       controllers.ProjectController.deleteProject(id:Int)
+POST          /project/updateProname                       controllers.ProjectController.updateProname
+POST          /project/updateDescription                   controllers.ProjectController.updateDescription
+
+GET           /project/openLogFile                         controllers.SampleController.openLogFile(id:Int)
+
+POST          /project/checkNewsample                      controllers.SampleController.checkNewsample(proname:String)
+POST          /project/checkSample                         controllers.SampleController.checkSample(proname:String)
+
+POST          /project/getAllSampleName                    controllers.SampleController.getAllSampleName(proname:String)
+
+GET           /parametron/species/toSpecies                controllers.SpeciesController.toSpecies
+POST          /parametron/species/uploadSpecies            controllers.SpeciesController.uploadSpecies
+GET           /parametron/species/speciesInfo              controllers.SpeciesController.speciesInfo
+PUT           /parametron/species/isRunCmd                 controllers.SpeciesController.isRunCmd(id:Int)
+GET           /parametron/species/getAllSpecies            controllers.SpeciesController.getAllSpecies
+DELETE        /parametron/species/deleteSpecies            controllers.SpeciesController.deleteSpecies(id:Int)
+GET           /parametron/species/getLog                   controllers.SpeciesController.getLog(id:Int)
+PUT           /parametron/species/updateSpeciesname        controllers.SpeciesController.updateSpeciesname
+GET           /parametron/species/checkSpecies             controllers.SpeciesController.checkSpecies
+GET           /parametron/species/home                     controllers.SpeciesController.home
+GET           /parametron/species/getAllSpeciesname        controllers.SpeciesController.getAllSpeciesname
+GET           /unix/getDisk                                controllers.SpeciesController.getDisk
+
+
+GET           /parametron/species/admin/toSpecies          controllers.SpeciesController.toAdminSpecies
+GET           /parametron/species/admin/speciesInfo        controllers.SpeciesController.adminSpeciesInfo
+GET           /parametron/species/admin/home               controllers.SpeciesController.adminHome
+
+GET           /parametron/sample/toDate                    controllers.SampleController.dataPage(proname:String)
+GET           /parametron/sample/toSE                      controllers.SampleController.toSE(proname:String)
+POST          /parametron/sample/updatePE                  controllers.SampleController.uploadPE
+POST          /parametron/sample/updateSE                  controllers.SampleController.uploadSE
+GET           /parametron/sample/downloadPE                controllers.SampleController.downloadPE(id:Int,code:Int)
+GET           /parametron/sample/downloadSE                controllers.SampleController.downloadSE(id:Int,code:Int)
+GET           /parametron/sample/openHtml                  controllers.SampleController.openHtml(id:Int,code:Int)
+POST          /parametron/sample/isRunCmd                  controllers.SampleController.isRunCmd(id:Int)
+GET           /parametron/sample/deployGet                 controllers.SampleController.deployGet(id:Int)
+POST          /parametron/sample/resetPE                   controllers.SampleController.resetPE
+POST          /parametron/sample/resetSE                   controllers.SampleController.resetSE
+
+GET           /parametron/task/getTime                     controllers.TaskController.getTime
+GET           /parametron/task/checkName                   controllers.TaskController.checkName(proname:String)
+POST          /parametron/task/saveDeploy                  controllers.TaskController.saveDeploy
+GET           /parametron/task/taskPage                    controllers.TaskController.taskPage(proname:String)
+GET           /parametron/task/toTaskPage                  controllers.TaskController.toTaskPage(proname:String)
+POST          /parametron/task/isRunCmd                    controllers.TaskController.isRunCmd(id:Int)
+GET           /parametron/task/getAllTask                  controllers.TaskController.getAllTask(proname:String)
+DELETE        /parametron/task/deleteTask                  controllers.TaskController.deleteTask(id:Int)
+GET           /parametron/task/getLog                      controllers.TaskController.getLog(id:Int)
+GET           /parametron/task/download                    controllers.TaskController.download(id:Int,code:Int)
+PUT           /parametron/task/updateTaskname              controllers.TaskController.updateTaskname
+GET           /parametron/task/getDeploy                   controllers.TaskController.getDeploy(id:Int)
+PUT           /parametron/task/resetTask                   controllers.TaskController.resetTask
+PUT           /parametron/task/runResetCmd                 controllers.TaskController.runResetCmd(id:Int)
+GET           /parametron/task/checkNewname                controllers.TaskController.checkNewname(proname:String)
+
+GET           /parametron/project/deleteAll                controllers.ProjectController.deleteAll(id:Int)
+
+GET           /otu/project/selected                        controllers.LoginController.selected
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /assets/*file                                controllers.Assets.at(path="/public", file)
