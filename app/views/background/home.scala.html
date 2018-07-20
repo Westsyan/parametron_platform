@@ -106,12 +106,16 @@
                                         <i class="fa fa-trash"></i>
                                     </button>
 
-                                    <button class="revamp" onclick="updateProname(this)" title="修改项目信息" value="@p.projectname" id="@p.id">
+                                    <button class="revamp" onclick="updateProname(this)" title="编辑项目信息" value="@p.projectname" id="@p.id">
                                         <i class="fa fa-pencil"></i>
                                     </button>
 
                                     <h3><a href='@routes.SampleController.enterHome(p.projectname)'>@p.projectname</a></h3>
-                                    <div style="margin-top: 20px;">物种类型：@p.species</div>
+                                    <div style="margin-top: 20px;">
+                                        <p style="float: left">物种类型：</p>
+                                        <p title="@p.species" class="instr" style="max-height: 20px;">@p.species</p>
+                                    </div>
+                                    <br>
                                     <div style="margin-top: 20px;">样品数量：@p.samcount</div>
 
                                     <div style="margin-top: 20px;">创建日期：@p.createdata.toLocalDate</div>
@@ -357,7 +361,8 @@
                     success: function (data) {
                         $(".species").select2(
                                 {
-                                    data: data
+                                    data: data,
+                                    minimumResultsForSearch: Infinity
                                 }
                         );
                     }
@@ -460,7 +465,7 @@
                         success: function (data) {
                             if (data.valid == "true") {
                                 $("#addModal").modal("hide")
-                                cpm("home", "添加成功");
+                                cpm("home", "新建成功");
                             }
                         }
                     });

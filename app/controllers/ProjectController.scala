@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
 class ProjectController @Inject()(admindao: adminDao, projectdao: projectDao, sampledao: sampleDao, speciesdao: speciesDao,
-                                  taskdao:taskDao) extends Controller {
+                                  taskdao: taskDao) extends Controller {
 
   case class projectData(species: String, projectname: String, description: String)
 
@@ -41,7 +41,9 @@ class ProjectController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     val project = ProjectRow(0, accId, projectname, description, date, 0, speciesRow.id, speciesRow.speciesname)
     Await.result(projectdao.addProject(Seq(project)), Duration.Inf)
     val proId = Await.result(projectdao.getIdByProjectname(accId, projectname), Duration.Inf)
-    new File(Utils.path + "/" + accId + "/" + proId).mkdirs()
+    val path = Utils.path + "/" + accId + "/" + proId
+    new File(path + "/data").mkdirs()
+    new File(path + "/task").mkdirs()
     println(project)
     Ok(Json.obj("valid" -> "true"))
   }
@@ -103,7 +105,7 @@ class ProjectController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     Ok(Json.obj("valid" -> "true"))
   }
 
-  case class updatePronameData(proId: Int, proname: String,description1:String)
+  case class updatePronameData(proId: Int, proname: String, description1: String)
 
   val updatePronameForm = Form(
     mapping(
@@ -118,12 +120,12 @@ class ProjectController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     val id = data.proId
     val proname = data.proname
     val des = data.description1
-    projectdao.getById(id).flatMap{p=>
-      if(p.projectname == proname){
-        projectdao.updateDescriptionById(id,des).map { x =>
+    projectdao.getById(id).flatMap { p =>
+      if (p.projectname == proname) {
+        projectdao.updateDescriptionById(id, des).map { x =>
           Ok(Json.obj("valid" -> "true"))
         }
-      }else{
+      } else {
         projectdao.updatePronameById(id, proname).flatMap { x =>
           projectdao.updateDescriptionById(id, des).map { x =>
             Ok(Json.obj("valid" -> "true"))
@@ -151,16 +153,22 @@ class ProjectController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     }
   }
 
-  def deleteAll(id:Int)= Action{implicit request=>
+  def deleteAll(id: Int) = Action { implicit request =>
+    val user = request.session.get("admin").getOrElse("user")
     val userid = request.session.get("id").getOrElse("0")
-    if(userid == "1") {
-        speciesdao.deleteByUserid(id).zip(taskdao.deleteByUserid(id)).
-          zip(sampledao.deleteByUserid(id)).zip(projectdao.deleteByUserid(id))
+    if (user == "admin" && userid == "1") {
+      val speciesId = Await.result(speciesdao.getByUserId(id), Duration.Inf)
+      speciesId.map { x =>
+        FileUtils.deleteDirectory(new File(Utils.speciesPath + "/" + x.id))
+        println(x.id)
+      }
+      speciesdao.deleteByUserid(id).zip(taskdao.deleteByUserid(id)).
+        zip(sampledao.deleteByUserid(id)).zip(projectdao.deleteByUserid(id))
     }
     val json = Json.toJson("success")
     request.queryString.get("callback").flatMap(_.headOption) match {
-           case Some(callback) => Ok(Jsonp(callback, json))
-           case None => Ok(json)
+      case Some(callback) => Ok(Jsonp(callback, json))
+      case None => Ok(json)
     }
   }
 }

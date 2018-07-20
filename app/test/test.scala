@@ -16,31 +16,30 @@ object test {
         val z = FileUtils.readLines(new File(x)).asScala
         val fpkm = z.map(_.split("\t").last)
         val count = z.map(_.split("\t")(4))
-        (fpkm,count)
+        val h = z.map(_.split("\t").head)
+        (fpkm,count,h)
       }
+
+      val id = q.map(_._3).head
+
       val q1 = q.map(_._1)
       val q2 = q.map(_._2)
 
-      for(i <- 0 to q1.size){
-        
+      var p = id
+      var p1 = id
+
+      for(i <- 0 until  q1.size){
+        val d =q1(i)
+        val d1 = q2(i)
+       p = p.zip(d).map(x=>(x._1+"\t"+x._2))
+       p1 = p1.zip(d1).map(x=>(x._1+"\t"+x._2))
       }
+      val head = "id\tA1\tA2\tA3"
+      p = head +: p.drop(1)
+      p1 = head +: p1.drop(1)
+      println(p.mkString("\n"))
+      println(p1.mkString("\n"))
 
-       val A1 = FileUtils.readLines(new File("D:\\workspace\\transcriptome_platform\\target\\universal/A1.genes.results")).asScala
-       val A2 = FileUtils.readLines(new File("D:\\workspace\\transcriptome_platform\\target\\universal/A2.genes.results")).asScala
-       val A3 = FileUtils.readLines(new File("D:\\workspace\\transcriptome_platform\\target\\universal/222.genes.results")).asScala
-
-      val head = A1.map(_.split("\t").head)
-      val a1 = A1.map(_.split("\t")(4))
-      val a2 = A2.map(_.split("\t")(4))
-      val a3 = A3.map(_.split("\t")(4))
-
-      val a11 = A1.map(_.split("\t").last)
-      val a21 = A2.map(_.split("\t").last)
-      val a31 = A3.map(_.split("\t").last)
-
-      val x =head.zip(a1).map(x=>(x._1+"\t"+x._2)).zip(a2).map(x=>(x._1+"\t"+x._2)).zip(a3).map(x=>(x._1+"\t"+x._2))
-
-      val y =head.zip(a11).map(x=>(x._1+"\t"+x._2)).zip(a21).map(x=>(x._1+"\t"+x._2)).zip(a31).map(x=>(x._1+"\t"+x._2))
     }
 
 

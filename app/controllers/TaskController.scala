@@ -124,7 +124,7 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
     val command1 = s"perl ${Utils.toolPath}/cuffnorm.pl -output1 ${path}/genes.fpkm_table.txt -output2 "+
                   s"${path}/genes.count_table.txt -output3 ${path}/isoforms.fpkm_table.txt -output4 "+
                   s"${path}/isoforms.count_table.txt -param --no-update-check --quiet --num-threads=2 "+
-                  s"--library-norm-method=${deploy(4)} --library-type=${deploy(3)} --compatible-hits-norm "+
+                  s"--library-norm-method=${deploy(4)} --library-type=${deploy(3)} ${deploy(5)} "+
                   s"-L ${deploy(2)} ${gtf} ${samples.mkString(" ")}"
 
     val command = new ExecCommand
@@ -185,7 +185,7 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
       }
       val operation = if (x.state == 1) {
         s"""
-           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行"><i class="fa fa-repeat"></i></button>
+           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行定量过程"><i class="fa fa-repeat"></i></button>
            |  <button class="update" onclick="openLog(this)" value="${x.id}" title="查看日志"><i class="fa fa-file-text"></i></button>
            |  <button class="delete" onclick="openDelete(this)" value="${x.taskname}" id="${x.id}" title="删除任务"><i class="fa fa-trash"></i></button>
            """.stripMargin

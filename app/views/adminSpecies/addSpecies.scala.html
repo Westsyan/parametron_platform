@@ -1,5 +1,5 @@
 @()(implicit session: Session)
-@adminSpecies.main("新增参考基因组"){
+@adminSpecies.main("转录组新增参考基因组"){
 
   <style>
           label {
@@ -29,30 +29,30 @@
 
               <div class="form-group">
                 <label class="col-sm-12">物种名:</label>
-                <div class="col-sm-6 indent">
+                <div class="col-sm-4 indent">
                   <input name="speciesname" id="speciesname" class="form-control" />
                 </div>
               </div>
 
               <div class="form-group">
                 <label class="col-sm-12">参考基因组序列（fasta 文件）:</label>
-                <div class="col-sm-6 indent">
+                <div class="col-sm-4 indent">
                   <input id="input-1" type="file" class="file" name="file1" data-show-preview="false"
-                  data-show-upload="false" accept=".fa,.fasta" >
+                  data-show-upload="false" accept=".fa,.fasta,.fa.gz,.fasta.gz" >
                 </div>
               </div>
 
               <div class="form-group">
                 <label class="col-sm-12">参考基因组注释（gtf 文件）:</label>
-                <div class="col-sm-6 indent">
+                <div class="col-sm-4 indent">
                   <input id="input-2" type="file" class="file" name="file2" data-show-preview="false"
-                  data-show-upload="false" accept=".gtf" >
+                  data-show-upload="false" accept=".gtf,.gtf.gz" >
                 </div>
               </div>
 
               <div class="form-group">
-                <div class = "actions col-sm-offset-1 col-sm-4">
-                  <button type="button" class="btn btn-primary" style="width: 90%;" id="search" onclick="Running()">
+                <div class = "actions indent col-sm-4">
+                  <button type="button" class="btn btn-primary" style="width: 100%;" id="search" onclick="Running()">
                     运行</button>
                 </div>
               </div>
@@ -98,17 +98,28 @@
                       url: '@routes.SpeciesController.checkSpecies()',
                       message:"物种名重复，请重新输入",
                       delay: 1000
-                    },
+                    }
                   }
                 },
                 file1:{
                   validators: {
                     notEmpty: {
-                      message: '请选择一个数据文件！'
+                      message: '请选择一个参考基因组序列（fasta）文件！'
                     },
                     file: {
-                      extension: 'fasta',
-                      message: '文件格式：fasta！'
+                      extension: 'fa,fasta,gz',
+                      message: '文件格式：fa,fa.gz,fasta,fasta.gz！'
+                    }
+                  }
+                },
+                file2:{
+                  validators: {
+                    notEmpty: {
+                      message: '请选择一个参考基因组注释（gtf）文件！'
+                    },
+                    file: {
+                      extension: 'gtf,gtf,gz',
+                      message: '文件格式：gtf,gtf.gz！'
                     }
                   }
                 }
@@ -152,7 +163,7 @@
                 },
                 success: function (data) {
                     var id = data.id;
-                    window.location.replace("@routes.SpeciesController.speciesInfo()");
+                    window.location.replace("@routes.SpeciesController.adminSpeciesInfo()");
                 }
               });
             }
@@ -163,7 +174,7 @@
               $('#progress').attr({value : e.loaded, max : e.total}); //更新数据到进度条
               var mydate = new Date();
               var time1 = mydate.getTime();
-              var speed = (e.loaded/1024)/((time1-time)/1000)
+              var speed = (e.loaded/1024)/((time1-time)/1000);
               var percent = e.loaded/e.total*100;
               $('#progress').html(percent.toFixed(2) + "%   " + parseInt(speed) + "KB/S" );
               $('#progress').css('width', percent.toFixed(2) + "%");

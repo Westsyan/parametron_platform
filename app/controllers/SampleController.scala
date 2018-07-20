@@ -30,8 +30,7 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
   def enterHome(projectname: String): Action[AnyContent] = Action { implicit request =>
     val userId = request.session.get("id").head.toInt
     val projectId = Await.result(projectdao.getIdByProjectname(userId, projectname), Duration.Inf)
-    val data = new File(Utils.path + "/" + userId + "/" + projectId)
-    val allName = Await.result(projectdao.getAllProject(userId), Duration.Inf)
+    val data = new File(Utils.path + "/" + userId + "/" + projectId + "/data")
     if (data.listFiles().size < 2) {
       Redirect(routes.SampleController.loadData(projectname))
     } else {
@@ -294,8 +293,8 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
     val type2 = "-"+type1
     val deploy = mutable.Buffer(row.id,  type1, paradata.stepMethod, paradata.adapter.get, paradata.seed_mismatches.getOrElse(2),
       paradata.palindrome_clip_threshold.getOrElse(30), paradata.simple_clip_threshold.getOrElse(10), paradata.trimMethod,
-      paradata.window_size.getOrElse(50), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(50),
-      paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(3),
+      paradata.window_size.getOrElse(20), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(35),
+      paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(20),
       paradata.cropMethod, paradata.crop.getOrElse(0), paradata.headcropMethod, paradata.headcrop.getOrElse(0), type2,//21
       fastadata.rna_strandness,fastadata.paired_end_options_selector,fastadata.minins.getOrElse(0),fastadata.maxins.getOrElse(500),fastadata.no_mixed,//26
       fastadata.no_discordant,fastadata.gtf,fastadata.report_type,fastadata.max_primary.getOrElse(5),fastadata.alignment_options_selector,//31
@@ -437,9 +436,9 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
       command += s"-gtf ${speciesPath}/genome.gtf "
     }
     command += s"""-param -p "2" -x ${speciesPath}/genome.fasta -1 ${outPath}/r1_paired_out.fastq -2 ${outPath}/r2_paired_out.fastq ${data(20)} """
-    if(data(21) != "None"){
+/*    if(data(21) != "None"){
       command += s"--rna-strandness ${data(21)} "
-    }
+    }*/
     //paired_end_options_selector
     if(data(22) == "advanced"){
       command += s"--minins ${data(23)} --maxins ${data(24)} ${data(25)} ${data(26)} "
@@ -784,16 +783,16 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
         if(x.inputType == "PE"){
         s"""
            |<a class="fastq" href="/parametron/sample/downloadPE?id=${x.id}&code=1" title="原始数据"><b>${x.sample}</b><b>_1.fastq</b></a>
-           |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=1" title="查看数据统计报告"><i class="fa fa-eye"></i></a>,
+           |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=1" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>,
            |<a class="fastq" href="/parametron/sample/downloadPE?id=${x.id}&code=2" title="原始数据"><b>${x.sample}</b><b>_2.fastq</b></a>
-           |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=2" title="查看数据统计报告"><i class="fa fa-eye"></i></a>,
-           |<a class="fastq" href="/parametron/sample/downloadPE?id=${x.id}&code=3" title="整合结果"><b>${x.sample}</b><b>.bam</b></a>
+           |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=2" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>,
+           |<a class="fastq" href="/parametron/sample/downloadPE?id=${x.id}&code=3" title="比对结果"><b>${x.sample}</b><b>.bam</b></a>
            """.stripMargin
         }else{
           s"""
              |<a class="fastq" href="/parametron/sample/downloadSE?id=${x.id}&code=1" title="原始数据"><b>${x.sample}</b><b>.fastq</b></a>
-             |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=1" title="查看数据统计报告"><i class="fa fa-eye"></i></a>,
-             |<a class="fastq" href="/parametron/sample/downloadSE?id=${x.id}&code=3" title="整合结果"><b>${x.sample}</b><b>.bam</b></a>
+             |<a class="fastq" target="_blank" href="/parametron/sample/openHtml?id=${x.id}&code=1" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>,
+             |<a class="fastq" href="/parametron/sample/downloadSE?id=${x.id}&code=3" title="比对结果"><b>${x.sample}</b><b>.bam</b></a>
            """.stripMargin
         }
 
@@ -803,7 +802,7 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
       val operation = if (x.state == 1) {
         s"""
            |  <button class="update" onclick="updateSample(this)" value="${x.sample}" id="${x.id}" title="修改样品名"><i class="fa fa-pencil"></i></button>
-           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行"><i class="fa fa-repeat"></i></button>
+           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行质控和比对"><i class="fa fa-repeat"></i></button>
            |  <button class="update" onclick="openLog(this)" value="${x.id}" title="查看日志"><i class="fa fa-file-text"></i></button>
            |  <button class="delete" onclick="openDelete(this)" value="${x.sample}" id="${x.id}" title="删除样品"><i class="fa fa-trash"></i></button>
            """.stripMargin

@@ -90,7 +90,7 @@
                 <div class="modal-header bg-primary">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title">
-                        <span id="lblAddTitle" style="font-weight: bold">RNA定量参数设置：</span>
+                        <span id="lblAddTitle" style="font-weight: bold">重新运行定量过程：</span>
                     </h4>
                 </div>
                 <form id="resetForm" data-toggle="validator" class="registration-form form-horizontal">
@@ -116,7 +116,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" style="display: none;">
                                 <label class="col-sm-12">
                                     Library prep used for input reads, strand-specific or not:</label>
                                 <div class="col-sm-6 indent">
@@ -126,7 +126,7 @@
                                         <option value="ff-unstranded">ff-unstranded</option>
                                         <option value="fr-firststrand">fr-firststrand</option>
                                         <option value="fr-secondstrand">fr-secondstrand</option>
-                                        <option value="fr-unstranded">fr-unstranded</option>
+                                        <option value="fr-unstranded" selected>fr-unstranded</option>
                                         <option value="transfrags">transfrags</option>
                                     </select>
                                 </div>

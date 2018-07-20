@@ -1,5 +1,5 @@
 @()(implicit session: Session)
-@adminSpecies.main("参考基因组一览"){
+@adminSpecies.main("转录组参考基因组一览"){
 
   <style>
           .update {
@@ -117,7 +117,7 @@
                   <div class="form-group">
                     <label class="control-label">
                       新的物种名: </label>
-                    <input class="form-control indent" name="newspecies" id="newspecies" >
+                    <input class="form-control indent" name="speciesname" id="speciesname" >
                   </div>
                 </div>
               </div>
@@ -225,7 +225,7 @@
                 validating: 'glyphicon glyphicon-refresh'
               },
               fields: {
-                newspecies: {
+                speciesname: {
                   validators: {
                     notEmpty: {
                       message: '不能为空!'
@@ -273,28 +273,6 @@
                 }
               })
             }
-          }
-
-          function restart(obj) {
-            var id = obj.value;
-            $.ajax({
-              url: "/project/Otu/getDeploy?id=" + id,
-              type: "post",
-              dataType: "json",
-              success: function (data) {
-                $("#otuIds").val(id);
-                $("#samples").val(data.sample);
-                $("#minseqlength").val(data.min);
-                $("#otu_radius_pct").val(data.otupct);
-                $("#id").val(data.id);
-                $("#strand").val(data.strand);
-                $("#method_1").val(data.method);
-                $("#c").val(data.c);
-                $("#uma").val(data.uma);
-                $("#s").val(data.s);
-                $("#rest").modal("show")
-              }
-            })
           }
 
           function openDelete(obj) {

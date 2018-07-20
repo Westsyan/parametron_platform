@@ -52,7 +52,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-sm-4">Cuffquant Precompute gene expression levels(原始数据质量值体系)</label>
+                                <label class="col-sm-4">Cuffnorm Create normalized expression levels(定量参数设置):
+                                    <a onclick="openHelp()"  title="帮助文档" class="helpIcon">
+                                        <i class="fa fa-question-circle-o"></i></a></label>
                                 <div class="col-sm-1">
                                     <a id="down-1" style="margin-left: 2em">
                                         <i class="fa fa-arrow-down"></i>
@@ -66,7 +68,7 @@
 
                             <div id="set-1" style="display: none" class="indent">
 
-                                <div class="form-group">
+                                <div class="form-group" style="display: none;">
                                     <p class="col-sm-5" style="text-indent: 1em;">
                                         Library prep used for input reads, strand-specific or not:</p>
                                     <div class="col-sm-12 indent-3">
@@ -128,6 +130,34 @@
         </div>
     </div>
 
+    <div id="helpShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">帮助文档：</span>
+                        <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row-fluid">
+                        <p class="helpClass">分析模块，利用Cuffnorm程序，根据BAM比对结果，对输入的多个样品进行表达水平定量分析，从而得到基因和转录本的表达量矩阵。</p>
+                        <br>
+
+                        <p class="helpClass">分析模块引用了Cufflinks-2.2.1软件包（
+                            <a target="_blank" href="http://cole-trapnell-lab.github.io/cufflinks/">http://cole-trapnell-lab.github.io/cufflinks/</a>）。</p>
+                        <br>
+                        <p class="helpClass">相关文献如下所示：</p>
+                        <p class="helpClass">Transcript assembly and quantification by RNA-Seq reveals unannotated transcripts and isoform switching during cell differentiation. Nature Biotechnology, 2010. doi:10.1038/nbt.1621.</p>
+                        <p class="helpClass">Improving RNA-Seq expression estimates by correcting for fragment bias. Genome Biology, 2011. doi:10.1186/gb-2011-12-3-r22.</p>
+                        <p class="helpClass">Identification of novel transcripts in annotated genomes using RNA-Seq. Bioinformatics, 2011. doi:10.1093/bioinformatics/btr355</p>
+                        <p class="helpClass">Differential analysis of gene regulation at transcript resolution with RNA-seq. Nature Biotechnology, 2012. doi:10.1038/nbt.2450</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
 
@@ -144,6 +174,10 @@
                 }
             });
 
+
+            function openHelp() {
+                $("#helpShow").modal("show")
+            }
 
             $(function () {
 
@@ -202,7 +236,7 @@
                         'sample[]': {
                             validators: {
                                 callback: {
-                                    message: '请至少选择俩个样品表型！',
+                                    message: '请至少选择俩个样品！',
                                     callback: function (value, validator, $field) {
                                         // Get the selected options
                                         var options = validator.getFieldElements('sample[]').val();

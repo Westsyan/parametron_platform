@@ -24,6 +24,17 @@ object Utils {
     value
   }
 
+  def getFile(path: String, outputPath: String,name:String): Unit = {
+    val suffix = name.split('.').last
+    if (suffix == "gz") {
+      FileUtils.writeStringToFile(new File(outputPath),"")
+      CompactAlgorithm.unGzipFile(path, outputPath)
+      new File(path).delete()
+    } else {
+      FileUtils.moveFile(new File(path), new File(outputPath))
+    }
+  }
+
   
   def getTime(startTime: Long) = {
     val endTime = System.currentTimeMillis()

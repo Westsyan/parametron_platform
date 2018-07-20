@@ -38,7 +38,7 @@
                 <label class="col-sm-12">参考基因组序列（fasta 文件）:</label>
                 <div class="col-sm-4 indent">
                   <input id="input-1" type="file" class="file" name="file1" data-show-preview="false"
-                  data-show-upload="false" accept=".fa,.fasta" >
+                  data-show-upload="false" accept=".fa,.fasta,.fa.gz,.fasta.gz" >
                 </div>
               </div>
 
@@ -46,7 +46,7 @@
                 <label class="col-sm-12">参考基因组注释（gtf 文件）:</label>
                 <div class="col-sm-4 indent">
                   <input id="input-2" type="file" class="file" name="file2" data-show-preview="false"
-                  data-show-upload="false" accept=".gtf" >
+                  data-show-upload="false" accept=".gtf,.gz,.gtf.gz" >
                 </div>
               </div>
 
@@ -98,17 +98,28 @@
                       url: '@routes.SpeciesController.checkSpecies()',
                       message:"物种名重复，请重新输入",
                       delay: 1000
-                    },
+                    }
                   }
                 },
                 file1:{
                   validators: {
                     notEmpty: {
-                      message: '请选择一个数据文件！'
+                      message: '请选择一个参考基因组序列（fasta）文件！'
                     },
                     file: {
-                      extension: 'fasta',
-                      message: '文件格式：fasta！'
+                      extension: 'fa,fasta,gz',
+                      message: '文件格式：fa,fa.gz,fasta,fasta.gz！'
+                    }
+                  }
+                },
+                file2:{
+                  validators: {
+                    notEmpty: {
+                      message: '请选择一个参考基因组注释（gtf）文件！'
+                    },
+                    file: {
+                      extension: 'gtf,gtf,gz',
+                      message: '文件格式：gtf,gtf.gz！'
                     }
                   }
                 }

@@ -79,8 +79,8 @@ class SpeciesController @Inject()(admindao: adminDao, projectdao: projectDao, sa
         val out1 = outPath + "/genome.fasta"
         val out2 = outPath + "/genome.gtf"
 
-        FileUtils.moveFile(new File(in1), new File(out1))
-        FileUtils.moveFile(new File(in2), new File(out2))
+        Utils.getFile(in1,out1,file.head.filename)
+        Utils.getFile(in2,out2,file.last.filename)
         runCmd(id)
       }
     } catch {
@@ -170,7 +170,7 @@ class SpeciesController @Inject()(admindao: adminDao, projectdao: projectDao, sa
   def dealWithSpecies(session: Session) = {
     val userId = session.get("id").head.toInt
     val userS = Await.result(speciesdao.getByUserId(userId), Duration.Inf)
-    val json = userS.map { x =>
+    val json = userS.sortBy(_.id).reverse.map { x =>
       val speciesname = x.speciesname
       val date = x.createdata.toLocalDate
       val state = if (x.state == 0) {
@@ -224,19 +224,19 @@ class SpeciesController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     Ok(Json.toJson(json))
   }
 
-  case class updateData(speciesId: Int, newspecies: String)
+  case class updateData(speciesId: Int, speciesname: String)
 
   val updateForm = Form(
     mapping(
       "speciesId" -> number,
-      "newspecies" -> text
+      "speciesname" -> text
     )(updateData.apply)(updateData.unapply)
   )
 
   def updateSpeciesname = Action.async { implicit request =>
     val data = updateForm.bindFromRequest.get
     val speciesId = data.speciesId
-    val newspecies = data.newspecies
+    val newspecies = data.speciesname
     speciesdao.updateSpeciesname(speciesId, newspecies).map { x =>
       Ok(Json.toJson("success"))
     }
@@ -257,12 +257,16 @@ class SpeciesController @Inject()(admindao: adminDao, projectdao: projectDao, sa
     }
   }
 
+
+
+
+
   def getAllSpeciesname = Action.async { implicit request =>
     val id = request.session.get("id").head.toInt
     speciesdao.getByUserId(id).flatMap { y =>
       speciesdao.getByUserId(1).map { z =>
         val all = y ++ z
-        val name = all.map(_.speciesname)
+        val name = all.filter(_.state ==1).sortBy(_.speciesname).map(_.speciesname)
         Ok(Json.toJson(name))
       }
     }

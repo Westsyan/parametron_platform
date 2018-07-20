@@ -7,6 +7,7 @@ function restart(obj) {
         type: "get",
         dataType: "json",
         success: function (data) {
+            hideArgue();
             if(data.inputType == "PE"){
                 $("#peId").val(data.id);
                 $("#proname_pe").val(data.proname);
@@ -78,6 +79,71 @@ function restart(obj) {
                 $("#max_intron_pe").val(data.max_intron);
                 $("#no_spliced_alignment_pe").val(data.no_spliced_alignment);
                 $("#tma_pe").val(data.tma);
+                if(data.stepMethod == "yes"){
+                    $(".stepValue").show();
+                }else{
+                    $(".stepValue").hide();
+                }
+                if(data.trimMethod == "yes"){
+                    $(".trimValue").show();
+                }else{
+                    $(".trimValue").hide();
+                }
+                if(data.minlenMethod == "yes"){
+                    $(".minlenValue").show();
+                }else{
+                    $(".minlenValue").hide();
+                }
+                if(data.leadingMethod == "yes"){
+                    $(".leadingValue").show();
+                }else{
+                    $(".leadingValue").hide();
+                }
+                if(data.trailingMethod == "trailingMethod"){
+                    $(".trailingValue").show();
+                }else{
+                    $(".trailingValue").hide();
+                }
+                if(data.cropMethod == "yes"){
+                    $(".cropValue").show();
+                }else{
+                    $(".cropValue").hide();
+                }
+                if(data.headcropMethod == "yes"){
+                    $(".headcropValue").show();
+                }else{
+                    $(".headcropValue").hide();
+                }
+                if(data.paired_end_options_selector == "advanced"){
+                    $(".pairedValue").show();
+                }else{
+                    $(".pairedValue").hide();
+                }
+                if(data.report_type == "advanced"){
+                    $(".reportValue").show();
+                }else{
+                    $(".reportValue").hide();
+                }
+                if(data.alignment_options_selector == "advanced"){
+                    $(".alignValue").show();
+                }else{
+                    $(".alignValue").hide();
+                }
+                if(data.input_options_selector == "advanced"){
+                    $(".inputValue").show();
+                }else{
+                    $(".inputValue").hide();
+                }
+                if(data.scoring_options_selector == "advanced"){
+                    $(".scoreValue").show();
+                }else{
+                    $(".scoreValue").hide();
+                }
+                if(data.spliced_options_selector == "advanced"){
+                    $(".splicedValue").show();
+                }else{
+                    $(".splicedValue").hide();
+                }
                 $("#restPE").modal("show")
             }else{
                 $("#seId").val(data.id);
@@ -150,6 +216,71 @@ function restart(obj) {
                 $("#max_intron_se").val(data.max_intron);
                 $("#no_spliced_alignment_se").val(data.no_spliced_alignment);
                 $("#tma_se").val(data.tma);
+                if(data.stepMethod == "yes"){
+                    $(".stepValue").show();
+                }else{
+                    $(".stepValue").hide();
+                }
+                if(data.trimMethod == "yes"){
+                    $(".trimValue").show();
+                }else{
+                    $(".trimValue").hide();
+                }
+                if(data.minlenMethod == "yes"){
+                    $(".minlenValue").show();
+                }else{
+                    $(".minlenValue").hide();
+                }
+                if(data.leadingMethod == "yes"){
+                    $(".leadingValue").show();
+                }else{
+                    $(".leadingValue").hide();
+                }
+                if(data.trailingMethod == "trailingMethod"){
+                    $(".trailingValue").show();
+                }else{
+                    $(".trailingValue").hide();
+                }
+                if(data.cropMethod == "yes"){
+                    $(".cropValue").show();
+                }else{
+                    $(".cropValue").hide();
+                }
+                if(data.headcropMethod == "yes"){
+                    $(".headcropValue").show();
+                }else{
+                    $(".headcropValue").hide();
+                }
+                if(data.paired_end_options_selector == "advanced"){
+                    $(".pairedValue").show();
+                }else{
+                    $(".pairedValue").hide();
+                }
+                if(data.report_type == "advanced"){
+                    $(".reportValue").show();
+                }else{
+                    $(".reportValue").hide();
+                }
+                if(data.alignment_options_selector == "advanced"){
+                    $(".alignValue").show();
+                }else{
+                    $(".alignValue").hide();
+                }
+                if(data.input_options_selector == "advanced"){
+                    $(".inputValue").show();
+                }else{
+                    $(".inputValue").hide();
+                }
+                if(data.scoring_options_selector == "advanced"){
+                    $(".scoreValue").show();
+                }else{
+                    $(".scoreValue").hide();
+                }
+                if(data.spliced_options_selector == "advanced"){
+                    $(".splicedValue").show();
+                }else{
+                    $(".splicedValue").hide();
+                }
                 $("#restSE").modal("show")
             }
         }
@@ -199,10 +330,10 @@ $("#down-4").click(function () {
     $("#up-4").show()
 });
 
-$("#up-1").click(function () {
-    $("#set-1").hide();
-    $("#down-1").show();
-    $("#up-1").hide()
+$("#up-4").click(function () {
+    $("#set-4").hide();
+    $("#down-").show();
+    $("#up-4").hide()
 });
 
 
@@ -371,6 +502,22 @@ function RunningSE() {
             }
         })
     }
+}
+
+function hideArgue() {
+    $("#set-1").hide();
+    $("#down-1").show();
+    $("#up-1").hide();
+    $("#set-2").hide();
+    $("#down-2").show();
+    $("#up-2").hide();
+    $("#set-3").hide();
+    $("#down-3").show();
+    $("#up-3").hide();
+    $("#set-4").hide();
+    $("#down-4").show();
+    $("#up-4").hide();
+
 }
 
 
